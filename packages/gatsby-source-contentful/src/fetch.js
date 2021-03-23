@@ -22,8 +22,8 @@ module.exports = async function contentfulFetch({
     integration: `gatsby-source-contentful`,
     responseLogger: response => {
       function createMetadataLog(response) {
-        if (process.env.gatsby_log_level === `verbose`) {
-          return ``
+        if (response) {
+          return null
         }
         return [
           response?.headers[`content-length`] &&
@@ -38,7 +38,7 @@ module.exports = async function contentfulFetch({
       }
 
       // Log error and throw it in an extended shape
-      if (response.isAxiosError) {
+      if (response.isAxiosError && response.response) {
         reporter.verbose(
           `${response.config.method} /${response.config.url}: ${
             response.response.status
@@ -61,7 +61,7 @@ module.exports = async function contentfulFetch({
       }
 
       // Sync progress
-      if (response.config.url === `sync`) {
+      if (response.config.url === `sync` && response.data) {
         syncItemCount += response.data.items.length
         syncProgress.total = syncItemCount
         syncProgress.tick(response.data.items.length)
